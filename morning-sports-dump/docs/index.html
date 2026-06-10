@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning Sports Dump</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🏆 Morning Sports Dump</h1>
+      <span class="tagline">Your daily sports briefing</span>
+    </div>
+  </header>
+
+  <main>
+    <button id="back-btn">← Back to reports</button>
+
+    <div id="report-list">
+      <h2>Reports</h2>
+      <div id="report-links"></div>
+    </div>
+
+    <article id="report-content"></article>
+  </main>
+
+  <footer>Morning Sports Dump</footer>
+
+  <script>
+    const reportList = document.getElementById('report-list');
+    const reportLinks = document.getElementById('report-links');
+    const reportContent = document.getElementById('report-content');
+    const backBtn = document.getElementById('back-btn');
+
+    function showList() {
+      reportList.style.display = '';
+      reportContent.classList.remove('active');
+      backBtn.classList.remove('active');
+    }
+
+    function showReport(html) {
+      reportList.style.display = 'none';
+      reportContent.innerHTML = html;
+      reportContent.classList.add('active');
+      backBtn.classList.add('active');
+    }
+
+    function mdToHtml(md) {
+      return md
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\n\n/g, '</p><p>')
+        .replace(/^(?!<[h|p])(.+)$/gm, '<p>$1</p>')
+        .replace(/<p><\/p>/g, '');
+    }
+
+    async function loadReports() {
+      const res = await fetch('reports.json');
+      const data = await res.json();
+      data.reports.forEach(report => {
+        const a = document.createElement('a');
+        a.href = '#';
+        a.className = 'report-link';
+        a.innerHTML = `<span class="date-badge">${report.date}</span><span class="title">${report.title}</span>`;
+        a.addEventListener('click', async e => {
+          e.preventDefault();
+          const mdRes = await fetch(report.file);
+          const md = await mdRes.text();
+          showReport(mdToHtml(md));
+        });
+        reportLinks.appendChild(a);
+      });
+    }
+
+    backBtn.addEventListener('click', showList);
+    loadReports();
+  </script>
+</body>
+</html>
