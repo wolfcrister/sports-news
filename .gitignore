@@ -1,0 +1,11 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+_site/
+.jekyll-cache/
+
+# OS files
+.DS_Store
+Thumbs.db
